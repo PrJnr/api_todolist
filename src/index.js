@@ -91,19 +91,45 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
 
   
   todo.title = title;
-  todo.deadline = deadline;
+  todo.deadline = new Date(deadlines);
 
-  return response.status(201).send();
+  return response.status(200).json(todo);
 
 
 });
 
 app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const {user} = request;
+  const {id} = request.params;
+  const {username} = request.headers;
+  
+  const listTodos = user.todos;
+  const todo = listTodos.find((todo)=>todo.id === id)
+
+  if(!todo){
+    return response.status(404).json({error: "Tarefa não existe"})
+  }
+
+  todo.done = true;
+
+  return response.status(201).send();
 });
 
 app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const {user} = request;
+  const {id} = request.params;
+
+  const listTodos = user.todos;
+  const todoPosition = listTodos.findIndex(todoPosition => todoPosition.id === id);
+
+  if(todoPosition === -1){
+    return response.status(404).json({error: "Tarefa não encontrada"})
+  }
+
+  user.todos.splice(todoPosition, 1);
+
+  return response.status(204).json();
+
 });
 
 module.exports = app;
